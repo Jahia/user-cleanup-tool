@@ -1,4 +1,4 @@
-package org.jahia.modules.userremovaltool;
+package org.jahia.modules.usercleanuptool;
 
 public class User {
     private String name;

@@ -55,11 +55,11 @@
         <version>8.1.0.1</version>
     </parent>
     <groupId>org.jahia.modules</groupId>
-    <artifactId>user-removal-tool</artifactId>
-    <name>User Removal Tool</name>
+    <artifactId>user-cleanup-tool</artifactId>
+    <name>User Cleanup Tool</name>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <description>This is the custom module (user-removal-tool) for running on a Jahia server.</description>
+    <description>This is the custom module (user-cleanup-tool) for running on a Jahia server.</description>
 
     <scm>
         <connection>scm:dummy:uri</connection>
@@ -67,7 +67,7 @@
     </scm>
 
     <properties>
-        <jahia-module-signature>MCwCFFKZzwGezieMVCperoTCMf0NLqGJAhQG+B1CASzzcZS0mHuxY4vFe745kA==</jahia-module-signature>
+        <jahia-module-signature>MCwCFHd7/Q8xFq7D7PM04VcTI6aK8h3LAhRMiv81tfaPer5biTUwD61/GtDCDg==</jahia-module-signature>
     </properties>
 
     <repositories>
