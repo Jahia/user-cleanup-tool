@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html;charset=UTF-8"
 %><?xml version="1.0" encoding="UTF-8" ?>
-<%@ page import="org.jahia.modules.userremovaltool.RemovalUtility" %>
+<%@ page import="org.jahia.modules.usercleanuptool.RemovalUtility" %>
 <%@ page import="java.util.List" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -44,8 +44,23 @@
             flex-direction: row;
             padding: 0 0 10px;
         }
+        .info {
+            font-size: large;
+            color: darkblue;
+            background-color: lightblue;
+            padding: 10px;
+            width: 700px;
+        }
     </style>
-
+    <script type="text/javascript">
+        function selectAll(e) {
+            var checked = e.target.checked;
+            var inputs = e.target.parentNode.parentNode.querySelectorAll("input");
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].checked = checked;
+            }
+        }
+    </script>
 </head>
 
 <c:set var="nextAce" value="${not empty param.nextAce ? param.nextAce : 0}"/>
@@ -66,6 +81,11 @@
 %>
 
 <body>
+
+<div class="info">
+    This tool helps you find and clean references, found in roles and groups, of users which are unknown to the system (e.g. it can happen when a user has been removed from a LDAP directory).
+</div>
+
 <div>
     <h2>Aces (jnt:ace) with nonexistent principals</h2>
     <c:choose>
@@ -73,6 +93,7 @@
             <form id="acesForm" action="?" method="post">
                 <input type="hidden" name="toolAccessToken" value="${toolAccessToken}"/>
                 <ul class="entryList">
+                    <li><input type="checkbox" onclick="selectAll(event)" value="Select all"/></li>
                     <c:forEach var="user" items="${aces}">
                         <li><input type="checkbox" name="acesToRemove" value="${user.path}"><strong>${user.name}</strong>&nbsp;at path&nbsp;<strong>${user.path}</strong></li>
                     </c:forEach>
@@ -114,6 +135,7 @@
             <form id="acesForm" action="?" method="post">
                 <input type="hidden" name="toolAccessToken" value="${toolAccessToken}"/>
                 <ul class="entryList">
+                    <li><input type="checkbox" onclick="selectAll(event)" value="Select all"/></li>
                     <c:forEach var="user" items="${members}">
                         <li><input type="checkbox" name="membersToRemove" value="${user.path}"><strong>${user.name}</strong>&nbsp;at path&nbsp;<strong>${user.path}</strong></li>
                     </c:forEach>

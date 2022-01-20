@@ -1,4 +1,4 @@
-package org.jahia.modules.userremovaltool;
+package org.jahia.modules.usercleanuptool;
 
 import org.jahia.services.content.JCRCallback;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -21,7 +21,7 @@ public final class RemovalUtility {
 
     private static Logger logger = LoggerFactory.getLogger(RemovalUtility.class);
 
-    public static final int SELECTION_SIZE = 10;
+    public static final int SELECTION_SIZE = 25;
     public static final int QUERY_STEP = 30;
 
     public static void removeNode(String[] paths) throws RepositoryException {

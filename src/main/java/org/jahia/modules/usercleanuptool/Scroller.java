@@ -1,4 +1,4 @@
-package org.jahia.modules.userremovaltool;
+package org.jahia.modules.usercleanuptool;
 
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.query.ScrollableQueryCallback;
