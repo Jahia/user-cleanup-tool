@@ -93,7 +93,7 @@
             <form id="acesForm" action="?" method="post">
                 <input type="hidden" name="toolAccessToken" value="${toolAccessToken}"/>
                 <ul class="entryList">
-                    <li><input type="checkbox" onclick="selectAll(event)" value="Select all"/></li>
+                    <li><input type="checkbox" onclick="selectAll(event)" name="Select all"/> <strong>Select all</strong></li>
                     <c:forEach var="user" items="${aces}">
                         <li><input type="checkbox" name="acesToRemove" value="${user.path}"><strong>${user.name}</strong>&nbsp;at path&nbsp;<strong>${user.path}</strong></li>
                     </c:forEach>
@@ -135,7 +135,7 @@
             <form id="acesForm" action="?" method="post">
                 <input type="hidden" name="toolAccessToken" value="${toolAccessToken}"/>
                 <ul class="entryList">
-                    <li><input type="checkbox" onclick="selectAll(event)" value="Select all"/></li>
+                    <li><input type="checkbox" onclick="selectAll(event)" value="SelectAll"/> <strong>Select all</strong></li>
                     <c:forEach var="user" items="${members}">
                         <li><input type="checkbox" name="membersToRemove" value="${user.path}"><strong>${user.name}</strong>&nbsp;at path&nbsp;<strong>${user.path}</strong></li>
                     </c:forEach>
