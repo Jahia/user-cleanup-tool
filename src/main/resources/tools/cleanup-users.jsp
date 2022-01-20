@@ -68,9 +68,14 @@
 
 <%
     String[] acesToRemove = request.getParameterValues("acesToRemove");
+    String[] membersToRemove = request.getParameterValues("membersToRemove");
 
     if (acesToRemove != null && acesToRemove.length > 0) {
         RemovalUtility.removeNode(acesToRemove);
+    }
+
+    if (membersToRemove != null && membersToRemove.length > 0) {
+        RemovalUtility.removeNode(membersToRemove);
     }
 
     String nextAce = request.getParameter("nextAce");
