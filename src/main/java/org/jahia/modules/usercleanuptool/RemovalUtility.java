@@ -66,7 +66,7 @@ public final class RemovalUtility {
             try {
                 if (node.hasProperty("j:member")) {
                     String member = node.getPropertyAsString("j:member");
-                    return node.getSession().getNodeByUUID(member) == null;
+                    return node.getSession().getNodeByIdentifier(member) == null;
                 }
             } catch (RepositoryException e) {
                 return true;
