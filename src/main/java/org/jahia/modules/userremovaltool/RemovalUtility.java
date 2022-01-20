@@ -21,13 +21,28 @@ public final class RemovalUtility {
 
     private static Logger logger = LoggerFactory.getLogger(RemovalUtility.class);
 
-    private static final int SIZE = 10;
+    public static final int SELECTION_SIZE = 10;
+    public static final int QUERY_STEP = 30;
 
-    public static void removeNode(String[] paths) {
-        System.out.println(paths);
+    public static void removeNode(String[] paths) throws RepositoryException {
+        JCRTemplate.getInstance().doExecuteWithSystemSession(new JCRCallback<Void>() {
+            @Override
+            public Void doInJCR(JCRSessionWrapper jcrSessionWrapper) throws RepositoryException {
+
+                for (String path : paths) {
+                    if (jcrSessionWrapper.nodeExists(path)) {
+                        jcrSessionWrapper.removeItem(path);
+                        logger.info("Removed node: {}", path);
+                    }
+                }
+
+                jcrSessionWrapper.save();
+                return null;
+            }
+        });
     }
 
-    public static List<User> getUsersFromAces() throws RepositoryException {
+    public static List<User> getUsersFromAces(int offset) throws RepositoryException {
         String query = "select * from [jnt:ace]";
         Function<JCRNodeWrapper, Boolean> pred = node -> {
             try {
@@ -42,10 +57,10 @@ public final class RemovalUtility {
             return false;
         };
 
-        return runQuery(query, pred, 0);
+        return runQuery(query, pred, offset);
     }
 
-    public static List<User> getMembers() throws RepositoryException {
+    public static List<User> getMembers(int offset) throws RepositoryException {
         String query = "select * from [jnt:member] as m where m.['jcr:primaryType'] = 'jnt:member'";
         Function<JCRNodeWrapper, Boolean> pred = node -> {
             try {
@@ -60,7 +75,7 @@ public final class RemovalUtility {
             return false;
         };
 
-        return runQuery(query, pred, 0);
+        return runQuery(query, pred, offset);
     }
 
     private static List<User> runQuery(String query, Function<JCRNodeWrapper, Boolean> predicate, int offset) throws RepositoryException {
@@ -70,14 +85,14 @@ public final class RemovalUtility {
                 List<JCRNodeWrapper> list = new ArrayList<>();
                 QueryManager qm = jcrSessionWrapper.getWorkspace().getQueryManager();
                 Query q = qm.createQuery(query, Query.JCR_SQL2);
-                ScrollableQuery scrollableQuery = new ScrollableQuery(SIZE, q);
-                scrollableQuery.execute(new Scroller(predicate, list, 20, offset));
+                ScrollableQuery scrollableQuery = new ScrollableQuery(QUERY_STEP, q);
+                scrollableQuery.execute(new Scroller(predicate, list, SELECTION_SIZE, offset));
 
                 return list.stream().map(n -> {
                     try {
                         return new User(n.getName(), n.getPath(), n.getPrimaryNodeTypeName());
                     } catch (RepositoryException e) {
-                        System.out.println(" *********** Error");
+                        logger.error("Failed to get node info", e);
                     }
                     return null;
                 }).collect(Collectors.toList());

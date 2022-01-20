@@ -56,7 +56,7 @@
     </parent>
     <groupId>org.jahia.modules</groupId>
     <artifactId>user-removal-tool</artifactId>
-    <name>user-removal-tool</name>
+    <name>User Removal Tool</name>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>This is the custom module (user-removal-tool) for running on a Jahia server.</description>

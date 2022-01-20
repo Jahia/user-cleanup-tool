@@ -25,7 +25,7 @@ public class Scroller extends ScrollableQueryCallback<Void> {
     public boolean scroll() throws RepositoryException {
         NodeIterator nodeIterator = stepResult.getNodes();
 
-        while(nodeIterator.hasNext() || tray.size() == capacity) {
+        while(nodeIterator.hasNext() && tray.size() < capacity) {
             JCRNodeWrapper node = (JCRNodeWrapper) nodeIterator.nextNode();
             if (Boolean.TRUE.equals(predicate.apply(node))) {
                 if (offset > 0) {
