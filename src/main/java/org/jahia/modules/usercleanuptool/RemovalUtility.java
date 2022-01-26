@@ -48,7 +48,11 @@ public final class RemovalUtility {
             try {
                 if (node.hasProperty("j:principal") && node.getPropertyAsString("j:principal").startsWith("u:")) {
                     String userName = node.getPropertyAsString("j:principal").replace("u:", "");
-                    return !JahiaUserManagerService.getInstance().userExists(userName);
+                    JahiaUserManagerService um = JahiaUserManagerService.getInstance();
+                    boolean existsGlobally = um.userExists(userName);
+                    boolean existsLocally = um.userExists(userName, node.getResolveSite().getSiteKey());
+
+                    return !existsGlobally && !existsLocally;
                 }
             } catch (RepositoryException e) {
                 logger.error("Failed to look up user", e);
