@@ -52,7 +52,7 @@
     <parent>
         <artifactId>jahia-modules</artifactId>
         <groupId>org.jahia.modules</groupId>
-        <version>8.1.0.1</version>
+        <version>7.3.0.0</version>
     </parent>
     <groupId>org.jahia.modules</groupId>
     <artifactId>user-cleanup-tool</artifactId>
@@ -65,10 +65,6 @@
         <connection>scm:dummy:uri</connection>
         <developerConnection>scm:dummy:uri</developerConnection>
     </scm>
-
-    <properties>
-        <jahia-module-signature>MCwCFHd7/Q8xFq7D7PM04VcTI6aK8h3LAhRMiv81tfaPer5biTUwD61/GtDCDg==</jahia-module-signature>
-    </properties>
 
     <repositories>
         <repository>
