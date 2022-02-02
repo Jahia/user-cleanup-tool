@@ -57,7 +57,7 @@
     <groupId>org.jahia.modules</groupId>
     <artifactId>user-cleanup-tool</artifactId>
     <name>User Cleanup Tool</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>This is the custom module (user-cleanup-tool) for running on a Jahia server.</description>
 
@@ -67,7 +67,7 @@
     </scm>
 
     <properties>
-        <jahia-module-signature>MCwCFHd7/Q8xFq7D7PM04VcTI6aK8h3LAhRMiv81tfaPer5biTUwD61/GtDCDg==</jahia-module-signature>
+        <jahia-module-signature>MCwCFC0yzEtX5v9DUTCqz0fg2KOWFadLAhQn2V6xXD3CERVtIN+q5U/Zk2Wl6g==</jahia-module-signature>
     </properties>
 
     <repositories>
