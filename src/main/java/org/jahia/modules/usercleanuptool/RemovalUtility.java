@@ -5,6 +5,7 @@ import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.content.JCRTemplate;
 import org.jahia.services.query.ScrollableQuery;
+import org.jahia.services.usermanager.JahiaGroupManagerService;
 import org.jahia.services.usermanager.JahiaUserManagerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,14 @@ public final class RemovalUtility {
                     boolean existsLocally = um.userExists(userName, node.getResolveSite().getSiteKey());
 
                     return !existsGlobally && !existsLocally;
+                }
+
+                if (node.hasProperty("j:principal") && node.getPropertyAsString("j:principal").startsWith("g:")) {
+                    String groupName = node.getPropertyAsString("j:principal").replace("g:", "");
+                    JahiaGroupManagerService gm = JahiaGroupManagerService.getInstance();
+                    boolean existsLocally = gm.groupExists(node.getResolveSite().getSiteKey(), groupName);
+
+                    return !JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupName) && !existsLocally && node.getPath().contains(String.format("/%s/", node.getResolveSite().getSiteKey()));
                 }
             } catch (RepositoryException e) {
                 logger.error("Failed to look up user", e);
