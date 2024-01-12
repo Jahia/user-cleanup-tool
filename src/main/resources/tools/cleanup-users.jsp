@@ -67,6 +67,14 @@
 <c:set var="nextMember" value="${not empty param.nextMember ? param.nextMember : 0}"/>
 
 <%
+   
+    //flush user/group caches to get the correct results
+    org.jahia.services.cache.CacheHelper.flushEhcacheByName("LDAPUsersCache", true);
+    org.jahia.services.cache.CacheHelper.flushEhcacheByName("LDAPGroupCache", true);
+    org.jahia.services.cache.CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaGroupManagerService.membershipCache", true);
+    org.jahia.services.cache.CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaUserManagerService.userPathByUserNameCache", true);
+    org.jahia.services.cache.CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaGroupManagerService.groupPathByGroupNameCache", true);
+   
     String[] acesToRemove = request.getParameterValues("acesToRemove");
     String[] membersToRemove = request.getParameterValues("membersToRemove");
 

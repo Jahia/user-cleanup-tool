@@ -93,6 +93,11 @@
                 <configuration>
                     <instructions>
                         <Jahia-Depends>default</Jahia-Depends>
+                        <Import-Package>
+                            org.jahia.services.cache,
+                            ${jahia.plugin.projectPackageImport},
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
