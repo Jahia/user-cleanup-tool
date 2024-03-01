@@ -67,6 +67,7 @@
 <c:set var="nextMember" value="${not empty param.nextMember ? param.nextMember : 0}"/>
 
 <%
+
     String[] acesToRemove = request.getParameterValues("acesToRemove");
     String[] membersToRemove = request.getParameterValues("membersToRemove");
 

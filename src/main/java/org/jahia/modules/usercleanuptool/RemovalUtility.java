@@ -1,5 +1,6 @@
 package org.jahia.modules.usercleanuptool;
 
+import org.jahia.services.cache.CacheHelper;
 import org.jahia.services.content.JCRCallback;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionWrapper;
@@ -26,6 +27,7 @@ public final class RemovalUtility {
     public static final int QUERY_STEP = 30;
 
     public static void removeNode(String[] paths) throws RepositoryException {
+        flushAllCaches();
         JCRTemplate.getInstance().doExecuteWithSystemSession(new JCRCallback<Void>() {
             @Override
             public Void doInJCR(JCRSessionWrapper jcrSessionWrapper) throws RepositoryException {
@@ -44,6 +46,7 @@ public final class RemovalUtility {
     }
 
     public static List<User> getUsersFromAces(int offset) throws RepositoryException {
+        flushAllCaches();
         String query = "select * from [jnt:ace]";
         Function<JCRNodeWrapper, Boolean> pred = node -> {
             try {
@@ -74,6 +77,7 @@ public final class RemovalUtility {
     }
 
     public static List<User> getMembers(int offset) throws RepositoryException {
+        flushAllCaches();
         String query = "select * from [jnt:member] as m where m.['jcr:primaryType'] = 'jnt:member'";
         Function<JCRNodeWrapper, Boolean> pred = node -> {
             try {
@@ -92,6 +96,7 @@ public final class RemovalUtility {
     }
 
     private static List<User> runQuery(String query, Function<JCRNodeWrapper, Boolean> predicate, int offset) throws RepositoryException {
+        flushAllCaches();
         return JCRTemplate.getInstance().doExecuteWithSystemSession(new JCRCallback<List<User>>() {
             @Override
             public List<User> doInJCR(JCRSessionWrapper jcrSessionWrapper) throws RepositoryException {
@@ -111,6 +116,16 @@ public final class RemovalUtility {
                 }).collect(Collectors.toList());
             }
         });
+
+    }
+
+    private static void flushAllCaches() {
+        //flush user/group caches to get the correct results
+        CacheHelper.flushEhcacheByName("LDAPUsersCache", true);
+        CacheHelper.flushEhcacheByName("LDAPGroupCache", true);
+        CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaGroupManagerService.membershipCache", true);
+        CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaUserManagerService.userPathByUserNameCache", true);
+        CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaGroupManagerService.groupPathByGroupNameCache", true);
 
     }
 }
