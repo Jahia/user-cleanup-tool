@@ -84,12 +84,12 @@ public final class RemovalUtility {
                 if (node.hasProperty("j:member")) {
                     String member = node.getPropertyAsString("j:member");
                     return node.getSession().getNodeByIdentifier(member) == null;
+                } else {
+                    return true; //jnt:member must have a j:member else it is invalid
                 }
             } catch (RepositoryException e) {
-                return true;
+                return true;  //in case of error return true
             }
-
-            return false;
         };
 
         return runQuery(query, pred, offset);
