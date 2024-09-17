@@ -64,7 +64,7 @@ public final class RemovalUtility {
                     JahiaGroupManagerService gm = JahiaGroupManagerService.getInstance();
                     boolean existsLocally = gm.groupExists(node.getResolveSite().getSiteKey(), groupName);
 
-                    return !JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupName) && !existsLocally && node.getPath().contains(String.format("/%s/", node.getResolveSite().getSiteKey()));
+                    return !JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupName) && !existsLocally && !gm.groupExists(null, groupName);
                 }
             } catch (RepositoryException e) {
                 logger.error("Failed to look up user", e);
