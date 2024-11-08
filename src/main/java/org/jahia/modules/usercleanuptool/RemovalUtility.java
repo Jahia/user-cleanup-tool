@@ -1,9 +1,12 @@
 package org.jahia.modules.usercleanuptool;
 
+import org.jahia.registries.ServicesRegistry;
 import org.jahia.services.cache.CacheHelper;
 import org.jahia.services.content.JCRCallback;
 import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
+import org.jahia.services.content.JCRStoreProvider;
 import org.jahia.services.content.JCRTemplate;
 import org.jahia.services.query.ScrollableQuery;
 import org.jahia.services.usermanager.JahiaGroupManagerService;
@@ -63,7 +66,7 @@ public final class RemovalUtility {
                     String groupName = node.getPropertyAsString("j:principal").replace("g:", "");
                     JahiaGroupManagerService gm = JahiaGroupManagerService.getInstance();
                     boolean existsLocally = gm.groupExists(node.getResolveSite().getSiteKey(), groupName);
-
+                                            
                     return !JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupName) && !existsLocally && !gm.groupExists(null, groupName);
                 }
             } catch (RepositoryException e) {
@@ -85,7 +88,7 @@ public final class RemovalUtility {
                     String member = node.getPropertyAsString("j:member");
                     return node.getSession().getNodeByIdentifier(member) == null;
                 } else {
-                    return true; //jnt:member must have a j:member else it is invalid
+                	return true; //jnt:member must have a j:member else it is invalid
                 }
             } catch (RepositoryException e) {
                 return true;  //in case of error return true
@@ -128,4 +131,65 @@ public final class RemovalUtility {
         CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaGroupManagerService.groupPathByGroupNameCache", true);
 
     }
+    
+    
+	public static List<JCRStoreProvider> getExternalUserProvider() throws RepositoryException {
+		
+		List<JCRStoreProvider> providers = new ArrayList<JCRStoreProvider>();
+		
+		JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession();
+		List<JCRStoreProvider> providerList = JahiaUserManagerService.getInstance().getProviderList(session);
+		if (providerList != null && !providerList.isEmpty()) {
+			for (JCRStoreProvider prov : providerList) {
+				if (!"default".equals(prov.getKey())) {
+					providers.add(prov);
+				}
+			}
+		}
+		//Check sites
+	    List<String> sites = ServicesRegistry.getInstance().getJahiaSitesService().getSitesNames();
+		
+		for (String site : sites) {
+			List<JCRStoreProvider> siteProviderList = JahiaUserManagerService.getInstance().getProviderList(site, session);
+			if (siteProviderList != null && !siteProviderList.isEmpty()) {
+				for (JCRStoreProvider prov : siteProviderList) {
+					if (!"default".equals(prov.getKey())) {
+						providers.add(prov);
+					}
+				}
+			}			
+		}
+		return providers;
+
+	}
+	
+	public static List<JCRStoreProvider> getExternalGroupProvider() throws RepositoryException {
+		
+		List<JCRStoreProvider> providers = new ArrayList<JCRStoreProvider>();
+		
+		JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession();
+		List<JCRStoreProvider> providerList = JahiaGroupManagerService.getInstance().getProviderList(null, session);
+		if (providerList != null && !providerList.isEmpty()) {
+			for (JCRStoreProvider prov : providerList) {
+				if (!"default".equals(prov.getKey())) {
+					providers.add(prov);
+				}
+			}
+		}
+		//Check sites
+	    List<String> sites = ServicesRegistry.getInstance().getJahiaSitesService().getSitesNames();
+		
+		for (String site : sites) {
+			List<JCRStoreProvider> siteProviderList = JahiaGroupManagerService.getInstance().getProviderList(site, session);
+			if (siteProviderList != null && !siteProviderList.isEmpty()) {
+				for (JCRStoreProvider prov : siteProviderList) {
+					if (!"default".equals(prov.getKey())) {
+						providers.add(prov);
+					}
+				}
+			}			
+		}
+		return providers;
+
+	}
 }

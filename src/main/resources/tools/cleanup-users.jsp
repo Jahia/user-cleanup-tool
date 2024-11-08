@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html;charset=UTF-8"
 %><?xml version="1.0" encoding="UTF-8" ?>
 <%@ page import="org.jahia.modules.usercleanuptool.RemovalUtility" %>
+<%@ page import="org.jahia.services.content.JCRStoreProvider" %>
 <%@ page import="java.util.List" %>
 <%@ taglib prefix="template" uri="http://www.jahia.org/tags/templateLib" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -51,6 +52,13 @@
             padding: 10px;
             width: 700px;
         }
+        .warning {
+            font-size: large;
+            color: red;
+            background-color: yellow;
+            padding: 10px;
+            width: 700px;
+        }      
     </style>
     <script type="text/javascript">
         function selectAll(e) {
@@ -90,7 +98,49 @@
 
 <div class="info">
     This tool helps you find and clean references, found in roles and groups, of users which are unknown to the system (e.g. it can happen when a user has been removed from a LDAP directory).
+</div><br/>
+  
+<div class="info">
+  <b>List of current External User Providers:</b><br/>
+  <%
+     boolean inActiveUser = false;
+     for (JCRStoreProvider prov : RemovalUtility.getExternalUserProvider()) {
+         String output = prov.getKey();
+         if (prov.isAvailable()) {
+             output += " for " + prov.getMountPoint() + " - active";
+         } else {
+             output += " for " + prov.getMountPoint() + " - <b>inactive</b>";
+             inActiveUser = true;
+         }
+         %><%=output%><br/><%
+     
+     }
+     %>
+  
+    <br/><b>List of current External Group Providers: </b><br/>
+     <%
+     boolean inActiveGroup = false;
+     for (JCRStoreProvider prov : RemovalUtility.getExternalGroupProvider()) {
+         String output = prov.getKey();
+         if (prov.isAvailable()) {
+             output += " for " + prov.getMountPoint() + " - active";
+         } else {
+             output += " for " + prov.getMountPoint() + " - <b>inactive</b>";
+             inActiveGroup = true;
+         }
+         %><%=output%></br><%
+     
+     }
+     %>
+     
+    <br/><br/><b>Check if all of your External Providers are in the list (if a provider is stopped it won't appear in the list)!</b>
+</div> <br/>
+<% if (inActiveGroup || inActiveUser) { %>       
+<div class="warning">
+    BE CAREFULL, SOME PROVIDERS ARE INACTIVE, BEFORE YOU CLEAN CHECK IF THE REFERENCES SHOULD BE REALLY DELETED!
 </div>
+<%}%>
+       
 
 <div>
     <h2>Aces (jnt:ace) with nonexistent principals</h2>
