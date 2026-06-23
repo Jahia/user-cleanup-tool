@@ -105,9 +105,6 @@
     </script>
 </head>
 
-<c:set var="nextAce" value="${not empty param.nextAce ? param.nextAce : 0}"/>
-<c:set var="nextMember" value="${not empty param.nextMember ? param.nextMember : 0}"/>
-
 <%
     String[] acesToRemove = request.getParameterValues("acesToRemove");
     String[] membersToRemove = request.getParameterValues("membersToRemove");
@@ -126,6 +123,11 @@
 
     pageContext.setAttribute("aces",    RemovalUtility.getUsersFromAces(RemovalUtility.SELECTION_SIZE * acePageIndex));
     pageContext.setAttribute("members", RemovalUtility.getMembers(RemovalUtility.SELECTION_SIZE * memberPageIndex));
+
+    // Expose the validated integer page indexes to EL so the pagination display/nav
+    // cannot trigger an EL coercion error on a non-numeric nextAce/nextMember param.
+    pageContext.setAttribute("nextAce", acePageIndex);
+    pageContext.setAttribute("nextMember", memberPageIndex);
 %>
 
 <body>
