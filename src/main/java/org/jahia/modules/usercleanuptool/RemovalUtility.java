@@ -19,15 +19,25 @@ import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class RemovalUtility {
 
-    private static Logger logger = LoggerFactory.getLogger(RemovalUtility.class);
+    private static final Logger logger = LoggerFactory.getLogger(RemovalUtility.class);
 
     public static final int SELECTION_SIZE = 25;
     public static final int QUERY_STEP = 30;
+
+    private static final String J_PRINCIPAL = "j:principal";
+    private static final String DEFAULT_PROVIDER_KEY = "default";
+    private static final String NT_ACE = "jnt:ace";
+    private static final String NT_MEMBER = "jnt:member";
+
+    private RemovalUtility() {
+        // Utility class: hide the implicit public constructor.
+    }
 
     public static void removeNode(String[] paths) throws RepositoryException {
         flushAllCaches();
@@ -37,8 +47,14 @@ public final class RemovalUtility {
 
                 for (String path : paths) {
                     if (jcrSessionWrapper.nodeExists(path)) {
-                        jcrSessionWrapper.removeItem(path);
-                        logger.info("Removed node: {}", path);
+                        JCRNodeWrapper node = jcrSessionWrapper.getNode(path);
+                        if (isCleanableType(node)) {
+                            jcrSessionWrapper.removeItem(path);
+                            logger.info("Removed node: {}", path);
+                        } else {
+                            logger.warn("Skipped node not of a cleanable type ({} / {}): {}",
+                                    NT_ACE, NT_MEMBER, path);
+                        }
                     }
                 }
 
@@ -48,13 +64,25 @@ public final class RemovalUtility {
         });
     }
 
+    /**
+     * Defense-in-depth guard: this tool is only meant to clean up orphaned {@code jnt:ace} and
+     * {@code jnt:member} nodes. Any other node type must never be removed, even if a path for it
+     * is passed in.
+     */
+    static boolean isCleanableType(JCRNodeWrapper node) throws RepositoryException {
+        if (node == null) {
+            return false;
+        }
+        return node.isNodeType(NT_ACE) || node.isNodeType(NT_MEMBER);
+    }
+
     public static List<User> getUsersFromAces(int offset) throws RepositoryException {
         flushAllCaches();
         String query = "select * from [jnt:ace]";
         Function<JCRNodeWrapper, Boolean> pred = node -> {
             try {
-                if (node.hasProperty("j:principal") && node.getPropertyAsString("j:principal").startsWith("u:")) {
-                    String userName = node.getPropertyAsString("j:principal").replace("u:", "");
+                if (node.hasProperty(J_PRINCIPAL) && node.getPropertyAsString(J_PRINCIPAL).startsWith("u:")) {
+                    String userName = node.getPropertyAsString(J_PRINCIPAL).replace("u:", "");
                     JahiaUserManagerService um = JahiaUserManagerService.getInstance();
                     boolean existsGlobally = um.userExists(userName);
                     boolean existsLocally = um.userExists(userName, node.getResolveSite().getSiteKey());
@@ -62,11 +90,11 @@ public final class RemovalUtility {
                     return !existsGlobally && !existsLocally;
                 }
 
-                if (node.hasProperty("j:principal") && node.getPropertyAsString("j:principal").startsWith("g:")) {
-                    String groupName = node.getPropertyAsString("j:principal").replace("g:", "");
+                if (node.hasProperty(J_PRINCIPAL) && node.getPropertyAsString(J_PRINCIPAL).startsWith("g:")) {
+                    String groupName = node.getPropertyAsString(J_PRINCIPAL).replace("g:", "");
                     JahiaGroupManagerService gm = JahiaGroupManagerService.getInstance();
                     boolean existsLocally = gm.groupExists(node.getResolveSite().getSiteKey(), groupName);
-                                            
+
                     return !JahiaGroupManagerService.PROTECTED_GROUPS.contains(groupName) && !existsLocally && !gm.groupExists(null, groupName);
                 }
             } catch (RepositoryException e) {
@@ -131,65 +159,54 @@ public final class RemovalUtility {
         CacheHelper.flushEhcacheByName("org.jahia.services.usermanager.JahiaGroupManagerService.groupPathByGroupNameCache", true);
 
     }
-    
-    
-	public static List<JCRStoreProvider> getExternalUserProvider() throws RepositoryException {
-		
-		List<JCRStoreProvider> providers = new ArrayList<JCRStoreProvider>();
-		
-		JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession();
-		List<JCRStoreProvider> providerList = JahiaUserManagerService.getInstance().getProviderList(session);
-		if (providerList != null && !providerList.isEmpty()) {
-			for (JCRStoreProvider prov : providerList) {
-				if (!"default".equals(prov.getKey())) {
-					providers.add(prov);
-				}
-			}
-		}
-		//Check sites
-	    List<String> sites = ServicesRegistry.getInstance().getJahiaSitesService().getSitesNames();
-		
-		for (String site : sites) {
-			List<JCRStoreProvider> siteProviderList = JahiaUserManagerService.getInstance().getProviderList(site, session);
-			if (siteProviderList != null && !siteProviderList.isEmpty()) {
-				for (JCRStoreProvider prov : siteProviderList) {
-					if (!"default".equals(prov.getKey())) {
-						providers.add(prov);
-					}
-				}
-			}			
-		}
-		return providers;
 
-	}
-	
-	public static List<JCRStoreProvider> getExternalGroupProvider() throws RepositoryException {
-		
-		List<JCRStoreProvider> providers = new ArrayList<JCRStoreProvider>();
-		
-		JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession();
-		List<JCRStoreProvider> providerList = JahiaGroupManagerService.getInstance().getProviderList(null, session);
-		if (providerList != null && !providerList.isEmpty()) {
-			for (JCRStoreProvider prov : providerList) {
-				if (!"default".equals(prov.getKey())) {
-					providers.add(prov);
-				}
-			}
-		}
-		//Check sites
-	    List<String> sites = ServicesRegistry.getInstance().getJahiaSitesService().getSitesNames();
-		
-		for (String site : sites) {
-			List<JCRStoreProvider> siteProviderList = JahiaGroupManagerService.getInstance().getProviderList(site, session);
-			if (siteProviderList != null && !siteProviderList.isEmpty()) {
-				for (JCRStoreProvider prov : siteProviderList) {
-					if (!"default".equals(prov.getKey())) {
-						providers.add(prov);
-					}
-				}
-			}			
-		}
-		return providers;
+    public static List<JCRStoreProvider> getExternalUserProvider() throws RepositoryException {
+        JahiaUserManagerService userManager = JahiaUserManagerService.getInstance();
+        return collectExternalProviders(
+                userManager::getProviderList,
+                userManager::getProviderList);
+    }
 
-	}
+    public static List<JCRStoreProvider> getExternalGroupProvider() throws RepositoryException {
+        JahiaGroupManagerService groupManager = JahiaGroupManagerService.getInstance();
+        return collectExternalProviders(
+                session -> groupManager.getProviderList(null, session),
+                groupManager::getProviderList);
+    }
+
+    /**
+     * Shared logic for {@link #getExternalUserProvider()} and {@link #getExternalGroupProvider()}:
+     * collect the global providers, then the per-site providers, filtering out the built-in
+     * {@code default} store provider.
+     *
+     * @param globalProviders fetches the global provider list for the given session
+     * @param siteProviders   fetches the provider list for a given site key and session
+     */
+    private static List<JCRStoreProvider> collectExternalProviders(
+            Function<JCRSessionWrapper, List<JCRStoreProvider>> globalProviders,
+            BiFunction<String, JCRSessionWrapper, List<JCRStoreProvider>> siteProviders)
+            throws RepositoryException {
+
+        List<JCRStoreProvider> providers = new ArrayList<>();
+        JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession();
+
+        addExternalProviders(providers, globalProviders.apply(session));
+
+        List<String> sites = ServicesRegistry.getInstance().getJahiaSitesService().getSitesNames();
+        for (String site : sites) {
+            addExternalProviders(providers, siteProviders.apply(site, session));
+        }
+        return providers;
+    }
+
+    private static void addExternalProviders(List<JCRStoreProvider> target, List<JCRStoreProvider> source) {
+        if (source == null || source.isEmpty()) {
+            return;
+        }
+        for (JCRStoreProvider prov : source) {
+            if (!DEFAULT_PROVIDER_KEY.equals(prov.getKey())) {
+                target.add(prov);
+            }
+        }
+    }
 }
