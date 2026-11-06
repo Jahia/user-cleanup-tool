@@ -4,7 +4,20 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      maven-dependencies:
+        patterns:
+          - "*"
+    ignore:
+      # Jahia parent / platform artifacts define the target Jahia version
+      - dependency-name: "org.jahia.*"
+      # OSGi spec artifacts change Require-Capability/Import-Package ranges (Jahia 8.2 ships DS 1.4)
+      - dependency-name: "org.osgi:*"
