@@ -58,6 +58,11 @@
     <packaging>bundle</packaging>
     <description>This is the custom module (user-cleanup-tool) for running on a Jahia server.</description>
 
+    <properties>
+        <!-- 6.7, the version of the 8.1.6.1 parent, fails in the dependencies goal (NoClassDefFoundError: ParsingContext) -->
+        <jahia.plugin.version>6.10</jahia.plugin.version>
+    </properties>
+
     <scm>
         <connection>scm:git:git@github.com:Jahia/user-cleanup-tool.git</connection>
         <developerConnection>scm:git:git@github.com:Jahia/user-cleanup-tool.git</developerConnection>
